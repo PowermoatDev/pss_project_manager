@@ -1,0 +1,6 @@
+IF DB_ID(N'PrintSecWarRoom') IS NULL
+BEGIN
+  CREATE DATABASE PrintSecWarRoom;
+END
+GO
+

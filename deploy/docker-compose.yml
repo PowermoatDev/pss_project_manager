@@ -1,0 +1,61 @@
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: printsec-mssql
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:-YourStrong!Passw0rd}"
+      MSSQL_PID: "Developer"
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql
+
+  mssql-init:
+    image: mcr.microsoft.com/mssql-tools
+    depends_on:
+      - mssql
+    environment:
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:-YourStrong!Passw0rd}"
+    volumes:
+      - ../database/init.sql:/init.sql:ro
+    command: >
+      /bin/bash -c "
+      for i in {1..60}; do
+        /opt/mssql-tools/bin/sqlcmd -S mssql -U sa -P $$MSSQL_SA_PASSWORD -Q 'SELECT 1' && break;
+        sleep 2;
+      done;
+      /opt/mssql-tools/bin/sqlcmd -S mssql -U sa -P $$MSSQL_SA_PASSWORD -i /init.sql"
+    restart: "no"
+
+  backend:
+    build:
+      context: ../backend
+    container_name: printsec-api
+    depends_on:
+      mssql-init:
+        condition: service_completed_successfully
+    environment:
+      APP_HOST: "0.0.0.0"
+      APP_PORT: "8080"
+      DATABASE_URL: "sqlserver://sa:${MSSQL_SA_PASSWORD:-YourStrong!Passw0rd}@mssql:1433?database=PrintSecWarRoom&encrypt=disable"
+      AUTO_MIGRATE: "true"
+      UPLOAD_DIR: "/app/uploads"
+      ALLOWED_ORIGIN: "*"
+    ports:
+      - "8080:8080"
+    volumes:
+      - uploads:/app/uploads
+
+  frontend:
+    build:
+      context: ../frontend
+    container_name: printsec-frontend
+    depends_on:
+      - backend
+    ports:
+      - "8088:80"
+
+volumes:
+  mssql-data:
+  uploads:

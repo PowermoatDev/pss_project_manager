@@ -1,0 +1,7 @@
+.gocache
+.gomodcache
+uploads
+tmp
+printsec-api
+.DS_Store
+
