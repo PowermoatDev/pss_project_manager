@@ -122,6 +122,10 @@ http://伺服器IP:8088
 - `dbo.project_notes`：備注說明歷程
 - `dbo.calendar_events`：共用行事曆
 
+詳細 UML 與 UI 資料影響評估請見：
+
+- `docs/database-design.md`
+
 專案狀態：
 
 - `need`：需求確認

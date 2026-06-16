@@ -1,0 +1,122 @@
+@startuml
+
+hide circle
+hide methods
+skinparam linetype ortho
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+
+title PSS Project Manager Database Design
+
+entity "projects" as projects {
+  * project_id : bigint <<PK>>
+  --
+  * project_code : nvarchar(40) <<UK>>
+  * project_name : nvarchar(200)
+  * client_name : nvarchar(160)
+  * spec_content : nvarchar(max)
+  * quote_content : nvarchar(max)
+  * quote_date : date
+  * quote_note : nvarchar(max)
+  * custom_need : nvarchar(max)
+  * custom_date : date
+  * custom_note : nvarchar(max)
+  * custom_days : decimal(10,2)
+  * poc_date : date
+  * poc_result : nvarchar(max)
+  * install_date : date
+  * done_date : date
+  * is_closed : bit
+  * status : varchar(20)
+  * owner : nvarchar(60)
+  * editor : nvarchar(60)
+  * latest_note : nvarchar(max)
+  * created_at : datetime2(0)
+  * updated_at : datetime2(0)
+}
+
+entity "project_files" as project_files {
+  * file_id : bigint <<PK>>
+  --
+  * project_id : bigint <<FK>>
+  * file_kind : varchar(20)
+  * file_name : nvarchar(260)
+  * file_url : nvarchar(600)
+  * uploaded_by : nvarchar(60)
+  * created_at : datetime2(0)
+}
+
+entity "project_notes" as project_notes {
+  * note_id : bigint <<PK>>
+  --
+  * project_id : bigint <<FK>>
+  * note_date : date
+  * note_text : nvarchar(max)
+  * created_by : nvarchar(60)
+  * created_at : datetime2(0)
+}
+
+entity "calendar_events" as calendar_events {
+  * event_id : bigint <<PK>>
+  --
+  * event_date : date
+  * event_time : char(5)
+  * event_type : nvarchar(40)
+  * title : nvarchar(200)
+  * owner : nvarchar(60)
+  * color : varchar(20)
+  * editor : nvarchar(60)
+  * created_at : datetime2(0)
+  * updated_at : datetime2(0)
+}
+
+projects ||--o{ project_files : has
+projects ||--o{ project_notes : has
+
+note right of projects
+UI project table and create dialog bind here.
+Status values used by frontend:
+- need
+- quote
+- poc
+- dev
+- closing
+- done
+- lost
+end note
+
+note right of project_files
+Frontend currently shows only the latest file
+for each file_kind: quote, custom.
+Physical file content is stored under uploads/.
+end note
+
+note right of project_notes
+Table exists in schema but is not wired into
+the current Go repository or Vue UI.
+end note
+
+note right of calendar_events
+Used by the shared weekly calendar.
+event_type and color are currently free-form.
+end note
+
+' Indexes
+note bottom of projects
+Indexes:
+- uq_projects_code (unique)
+- ix_projects_status (is_closed, status, install_date)
+end note
+
+note bottom of project_files
+Indexes:
+- ix_project_files_project_kind
+  (project_id, file_kind, created_at desc)
+end note
+
+note bottom of calendar_events
+Indexes:
+- ix_calendar_events_date (event_date, event_time)
+end note
+
+@enduml
