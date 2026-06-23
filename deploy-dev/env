@@ -1,0 +1,7 @@
+DATABASE_URL=sqlserver://sa:P%40ssw0rdpssdba@192.168.100.14:1433?database=PrintSecWarRoom&encrypt=disable
+MSSQL_SA_PASSWORD=P@ssw0rdpssdba
+APP_HOST=0.0.0.0
+APP_PORT=8080
+AUTO_MIGRATE=true
+UPLOAD_DIR=/app/uploads
+ALLOWED_ORIGIN=*
