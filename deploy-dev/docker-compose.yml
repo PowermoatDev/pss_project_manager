@@ -1,0 +1,25 @@
+services:
+  backend:
+    build:
+      context: ../backend
+    container_name: printsec-api
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    volumes:
+      - uploads:/app/uploads
+
+  frontend:
+    build:
+      context: ../frontend
+    container_name: printsec-frontend
+    depends_on:
+      - backend
+    ports:
+      - "8088:80"
+
+volumes:
+  uploads:
